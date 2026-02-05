@@ -55,8 +55,8 @@ namespace wizardsoft_testtask.Middleware
                 message = "Internal server error";
             }
             context.Response.StatusCode = statusCode;
-            var response = new { code, message };
-            var json = JsonSerializer.Serialize(response);
+            object response = new { code, message };
+            string json = JsonSerializer.Serialize(response);
             return context.Response.WriteAsync(json);
         }
     }

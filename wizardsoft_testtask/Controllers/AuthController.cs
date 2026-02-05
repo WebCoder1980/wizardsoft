@@ -29,14 +29,14 @@ namespace wizardsoft_testtask.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
-            var result = await _service.Login(request);
+            LoginResponse? result = await _service.Login(request);
             return Ok(result);
         }
 
         [HttpPost("register")]
         public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
         {
-            var result = await _service.Register(request);
+            RegisterResponse? result = await _service.Register(request);
             return Ok(result);
         }
     }

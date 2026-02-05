@@ -25,30 +25,30 @@ namespace wizardsoft_testtask.Service.Auth
         }
         public async Task<LoginResponse?> Login(LoginRequest request)
         {
-            var user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == request.UserName);
+            User? user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == request.UserName);
             if (user == null)
             {
                 throw new InvalidCredentialsException();
             }
 
-            var passwordHash = AuthUtil.HashPassword(request.Password);
+            string passwordHash = AuthUtil.HashPassword(request.Password);
             if (!string.Equals(user.PasswordHash, passwordHash, StringComparison.Ordinal))
             {
                 throw new InvalidCredentialsException();
             }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtOptions.Key);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
+            byte[] key = Encoding.UTF8.GetBytes(_jwtOptions.Key);
 
-            var claims = new List<Claim>
+            List<Claim> claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, request.UserName),
                 new Claim(ClaimTypes.Role, user.Role)
             };
 
-            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+            SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
-            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
+            SecurityToken token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresMinutes),
@@ -57,20 +57,20 @@ namespace wizardsoft_testtask.Service.Auth
                 SigningCredentials = credentials
             });
 
-            var jwt = tokenHandler.WriteToken(token);
+            string jwt = tokenHandler.WriteToken(token);
 
             return new LoginResponse(jwt, request.UserName, user.Role);
         }
 
         public async Task<RegisterResponse?> Register(RegisterRequest request)
         {
-            var exists = await _dbContext.Users.AnyAsync(x => x.UserName == request.UserName);
+            bool exists = await _dbContext.Users.AnyAsync(x => x.UserName == request.UserName);
             if (exists)
             {
                 throw new UserAlreadyExistsException();
             }
 
-            var user = new User
+            User user = new User
             {
                 UserName = request.UserName,
                 PasswordHash = AuthUtil.HashPassword(request.Password),

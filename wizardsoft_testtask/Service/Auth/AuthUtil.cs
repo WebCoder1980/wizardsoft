@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace wizardsoft_testtask.Service.Auth
@@ -7,8 +7,8 @@ namespace wizardsoft_testtask.Service.Auth
     {
         public static string HashPassword(string password)
         {
-            var bytes = Encoding.UTF8.GetBytes(password);
-            var hashBytes = SHA256.HashData(bytes);
+            byte[] bytes = Encoding.UTF8.GetBytes(password);
+            byte[] hashBytes = SHA256.HashData(bytes);
             return Convert.ToHexString(hashBytes);
         }
     }

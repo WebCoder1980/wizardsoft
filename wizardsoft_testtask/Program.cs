@@ -8,7 +8,7 @@ using wizardsoft_testtask.Middleware;
 using wizardsoft_testtask.Service;
 using wizardsoft_testtask.Service.Auth;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
@@ -19,7 +19,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SupportNonNullableReferenceTypes();
 
-    var securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    Microsoft.OpenApi.Models.OpenApiSecurityScheme securityScheme = new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -49,11 +49,11 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtKey = jwtSection.GetValue<string>("Key") ?? string.Empty;
-var issuer = jwtSection.GetValue<string>("Issuer");
-var audience = jwtSection.GetValue<string>("Audience");
-var keyBytes = Encoding.UTF8.GetBytes(jwtKey);
+Microsoft.Extensions.Configuration.IConfigurationSection jwtSection = builder.Configuration.GetSection("Jwt");
+string jwtKey = jwtSection.GetValue<string>("Key") ?? string.Empty;
+string? issuer = jwtSection.GetValue<string>("Issuer");
+string? audience = jwtSection.GetValue<string>("Audience");
+byte[] keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -73,7 +73,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

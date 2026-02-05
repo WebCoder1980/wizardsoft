@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using wizardsoft_testtask.Data;
 using wizardsoft_testtask.Dtos;
 using wizardsoft_testtask.Models;
@@ -16,7 +16,7 @@ namespace wizardsoft_testtask.Service
 
         public async Task<TreeNodeResponse?> GetAsync(long id, CancellationToken cancellationToken)
         {
-            var node = await _db.TreeNodes
+            TreeNode? node = await _db.TreeNodes
                 .AsNoTracking()
                 .Include(x => x.Children)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
@@ -36,7 +36,7 @@ namespace wizardsoft_testtask.Service
 
         public async Task<IReadOnlyCollection<TreeNodeRootResponse>> GetRootsWithChildrenIdAsync(CancellationToken cancellationToken)
         {
-            var result = await GetRootsAsync(cancellationToken);
+            IReadOnlyCollection<TreeNodeResponse> result = await GetRootsAsync(cancellationToken);
 
             return result
                 .Select(x => new TreeNodeRootResponse(
@@ -49,7 +49,7 @@ namespace wizardsoft_testtask.Service
 
         public async Task<TreeNodeResponse> CreateAsync(TreeNodeCreateRequest request, CancellationToken cancellationToken)
         {
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             TreeNode? parent = null;
             if (request.ParentId.HasValue)
@@ -61,7 +61,7 @@ namespace wizardsoft_testtask.Service
                 }
             }
 
-            var entity = new TreeNode
+            TreeNode entity = new TreeNode
             {
                 Name = request.Name,
                 ParentId = parent?.Id
@@ -76,9 +76,9 @@ namespace wizardsoft_testtask.Service
 
         public async Task<TreeNodeResponse?> UpdateAsync(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
         {
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
-            var node = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+            TreeNode? node = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
             if (node == null)
             {
                 return null;
@@ -91,7 +91,7 @@ namespace wizardsoft_testtask.Service
                     throw new InvalidOperationException("Node cannot be its own parent");
                 }
 
-                var newParent = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == request.ParentId.Value, cancellationToken);
+                TreeNode? newParent = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == request.ParentId.Value, cancellationToken);
                 if (newParent == null)
                 {
                     throw new InvalidOperationException("Parent not found");
@@ -114,7 +114,7 @@ namespace wizardsoft_testtask.Service
             await _db.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
 
-            var reloaded = await _db.TreeNodes
+            TreeNode reloaded = await _db.TreeNodes
                 .AsNoTracking()
                 .Include(x => x.Children)
                 .FirstAsync(x => x.Id == id, cancellationToken);
@@ -124,9 +124,9 @@ namespace wizardsoft_testtask.Service
 
         public async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken)
         {
-            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
-            var node = await _db.TreeNodes
+            TreeNode? node = await _db.TreeNodes
                 .Include(x => x.Children)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
@@ -145,13 +145,13 @@ namespace wizardsoft_testtask.Service
 
         private async Task<IReadOnlyCollection<TreeNodeResponse>> GetRootsAsync(CancellationToken cancellationToken)
         {
-            var roots = await _db.TreeNodes
+            List<TreeNode> roots = await _db.TreeNodes
                 .Where(x => x.ParentId == null)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            var result = new List<TreeNodeResponse>();
-            foreach (var root in roots)
+            List<TreeNodeResponse> result = new List<TreeNodeResponse>();
+            foreach (TreeNode root in roots)
             {
                 result.Add(await BuildTree(root, cancellationToken));
             }
@@ -161,13 +161,13 @@ namespace wizardsoft_testtask.Service
 
         private async Task<TreeNodeResponse> BuildTree(TreeNode node, CancellationToken cancellationToken)
         {
-            var children = await _db.TreeNodes
+            List<TreeNode> children = await _db.TreeNodes
                 .AsNoTracking()
                 .Where(x => x.ParentId == node.Id)
                 .ToListAsync(cancellationToken);
 
-            var childResponses = new List<TreeNodeResponse>();
-            foreach (var child in children)
+            List<TreeNodeResponse> childResponses = new List<TreeNodeResponse>();
+            foreach (TreeNode child in children)
             {
                 childResponses.Add(await BuildTree(child, cancellationToken));
             }
@@ -177,7 +177,7 @@ namespace wizardsoft_testtask.Service
 
         private async Task<bool> IsDescendantAsync(long nodeId, long potentialAncestorId, CancellationToken cancellationToken)
         {
-            var current = await _db.TreeNodes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == nodeId, cancellationToken);
+            TreeNode? current = await _db.TreeNodes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == nodeId, cancellationToken);
             while (current != null && current.ParentId.HasValue)
             {
                 if (current.ParentId.Value == potentialAncestorId)
@@ -192,11 +192,11 @@ namespace wizardsoft_testtask.Service
         }
         private async Task DeleteSubtree(TreeNode node, CancellationToken cancellationToken)
         {
-            var children = await _db.TreeNodes
+            List<TreeNode> children = await _db.TreeNodes
                 .Where(x => x.ParentId == node.Id)
                 .ToListAsync(cancellationToken);
 
-            foreach (var child in children)
+            foreach (TreeNode child in children)
             {
                 await DeleteSubtree(child, cancellationToken);
             }
