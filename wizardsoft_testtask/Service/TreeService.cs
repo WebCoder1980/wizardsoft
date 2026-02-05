@@ -47,6 +47,33 @@ namespace wizardsoft_testtask.Service
                 .ToList();
         }
 
+        public async Task<TreeNodeResponse> CreateAsync(TreeNodeCreateRequest request, CancellationToken cancellationToken)
+        {
+            await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+
+            TreeNode? parent = null;
+            if (request.ParentId.HasValue)
+            {
+                parent = await _db.TreeNodes.FirstOrDefaultAsync(x => x.Id == request.ParentId.Value, cancellationToken);
+                if (parent == null)
+                {
+                    throw new InvalidOperationException("Parent not found");
+                }
+            }
+
+            var entity = new TreeNode
+            {
+                Name = request.Name,
+                ParentId = parent?.Id
+            };
+
+            _db.TreeNodes.Add(entity);
+            await _db.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+
+            return new TreeNodeResponse(entity.Id, entity.Name, entity.ParentId, Array.Empty<TreeNodeResponse>());
+        }
+
         public async Task<TreeNodeResponse?> UpdateAsync(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync(cancellationToken);

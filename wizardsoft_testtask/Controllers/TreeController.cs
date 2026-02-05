@@ -6,6 +6,7 @@ using wizardsoft_testtask.Service;
 namespace wizardsoft_testtask.Controllers
 {
     [ApiController]
+    [Route("[controller]")]
     public class TreeController : ControllerBase
     {
         private readonly ITreeService _service;
@@ -39,6 +40,13 @@ namespace wizardsoft_testtask.Controllers
         {
             var tree = await _service.ExportAsync(cancellationToken);
             return Ok(tree);
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<TreeNodeResponse>> Create(TreeNodeCreateRequest request, CancellationToken cancellationToken)
+        {
+            var created = await _service.CreateAsync(request, cancellationToken);
+            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
         }
 
         [HttpPut("{id:long}")]

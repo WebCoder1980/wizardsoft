@@ -17,6 +17,7 @@ namespace wizardsoft_testtask.Data
             modelBuilder.Entity<TreeNode>(entity =>
             {
                 entity.HasKey(x => x.Id);
+                entity.Property(x => x.Id).ValueGeneratedOnAdd();
                 entity.Property(x => x.Name).IsRequired().HasMaxLength(200);
                 entity.HasOne(x => x.Parent)
                     .WithMany(x => x.Children)
