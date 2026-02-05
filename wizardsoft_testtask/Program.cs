@@ -5,6 +5,7 @@ using System.Text;
 using wizardsoft_testtask.Data;
 using wizardsoft_testtask.Dtos;
 using wizardsoft_testtask.Service;
+using wizardsoft_testtask.Service.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -41,6 +42,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITreeService, TreeService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
@@ -77,6 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

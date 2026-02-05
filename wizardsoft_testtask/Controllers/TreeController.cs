@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using wizardsoft_testtask.Constants;
 using wizardsoft_testtask.Dtos;
 using wizardsoft_testtask.Service;
 
@@ -46,7 +47,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = AppRoles.ADMIN)]
         public async Task<ActionResult<TreeNodeResponse>> Create(TreeNodeCreateRequest request, CancellationToken cancellationToken)
         {
             var created = await _service.CreateAsync(request, cancellationToken);
@@ -54,7 +55,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpPut("{id:long}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = AppRoles.ADMIN)]
         public async Task<ActionResult<TreeNodeResponse>> Update(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
         {
             var updated = await _service.UpdateAsync(id, request, cancellationToken);
@@ -67,7 +68,7 @@ namespace wizardsoft_testtask.Controllers
         }
 
         [HttpDelete("{id:long}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = AppRoles.ADMIN)]
         public async Task<IActionResult> Delete(long id, CancellationToken cancellationToken)
         {
             var deleted = await _service.DeleteAsync(id, cancellationToken);

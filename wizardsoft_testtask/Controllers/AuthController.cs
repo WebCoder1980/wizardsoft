@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 using wizardsoft_testtask.Dtos;
+using wizardsoft_testtask.Data;
+using wizardsoft_testtask.Models;
 using LoginRequest = wizardsoft_testtask.Dtos.LoginRequest;
+using wizardsoft_testtask.Service.Auth;
+using System.Threading.Tasks;
 
 namespace wizardsoft_testtask.Controllers
 {
@@ -14,55 +19,37 @@ namespace wizardsoft_testtask.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly JwtOptions _jwtOptions;
+        private readonly IAuthService _service;
 
-        private static readonly IReadOnlyDictionary<string, (string Password, string Role)> Users = new Dictionary<string, (string Password, string Role)>
+        public AuthController(IAuthService service)
         {
-            ["admin"] = ("admin_password", "Admin"),
-            ["maxsmg"] = ("qweqwe", "User")
-        };
-
-        public AuthController(IOptions<JwtOptions> jwtOptions)
-        {
-            _jwtOptions = jwtOptions.Value;
+            _service = service;
         }
 
         [HttpPost("login")]
-        public ActionResult<LoginResponse> Login(LoginRequest request)
+        public async Task<ActionResult<LoginResponse>> Login(LoginRequest request)
         {
-            if (!Users.TryGetValue(request.UserName, out var userInfo))
+            var result = await _service.Login(request);
+
+            if (result == null)
             {
-                return Unauthorized();
+                return Conflict();
             }
 
-            if (userInfo.Password != request.Password)
+            return Ok(result);
+        }
+
+        [HttpPost("register")]
+        public async Task<ActionResult<RegisterResponse>> Register(RegisterRequest request)
+        {
+            var result = await _service.Register(request);
+            
+            if (result == null)
             {
-                return Unauthorized();
+                return Conflict();
             }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(_jwtOptions.Key);
-
-            var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, request.UserName),
-            new Claim(ClaimTypes.Role, userInfo.Role)
-        };
-
-            var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
-
-            var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddMinutes(_jwtOptions.ExpiresMinutes),
-                Issuer = _jwtOptions.Issuer,
-                Audience = _jwtOptions.Audience,
-                SigningCredentials = credentials
-            });
-
-            var jwt = tokenHandler.WriteToken(token);
-
-            return Ok(new LoginResponse(jwt, request.UserName, userInfo.Role));
+            return Ok(result);
         }
     }
 }

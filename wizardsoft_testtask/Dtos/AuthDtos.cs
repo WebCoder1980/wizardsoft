@@ -1,7 +1,10 @@
-﻿namespace wizardsoft_testtask.Dtos
+namespace wizardsoft_testtask.Dtos
 {
     public record LoginRequest(string UserName, string Password);
     public record LoginResponse(string Token, string UserName, string Role);
+    public record RegisterRequest(string UserName, string Password);
+    public record RegisterResponse(string UserName, string Role);
+
     public class JwtOptions
     {
         public string Issuer { get; set; } = string.Empty;
