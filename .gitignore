@@ -2,3 +2,6 @@
 
 /wizardsoft_testtask/bin
 /wizardsoft_testtask/obj
+/wizardsoft_testtask/app.db
+/wizardsoft_testtask/app.db-shm
+/wizardsoft_testtask/app.db-wal

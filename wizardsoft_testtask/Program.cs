@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using wizardsoft_testtask.Data;
+using wizardsoft_testtask.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ITreeService, TreeService>();
 
 var app = builder.Build();
 
