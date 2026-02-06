@@ -11,7 +11,7 @@ namespace wizardsoft_testtask.Data
     {
         public AppDbContext(DbContextOptions options) : base(options)
         {
-            Database.EnsureCreated();
+
         }
 
         public DbSet<TreeNode> TreeNodes { get; set; }

@@ -73,6 +73,10 @@ builder.Services.AddAuthentication(authOptions =>
 
 WebApplication app = builder.Build();
 
+IServiceScope scope = app.Services.CreateScope();
+AppDbContext db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+db.Database.EnsureCreated();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
