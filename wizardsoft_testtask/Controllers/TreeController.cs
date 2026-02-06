@@ -7,7 +7,7 @@ using wizardsoft_testtask.Service;
 namespace wizardsoft_testtask.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class TreeController : ControllerBase
     {
         private readonly ITreeService _service;
