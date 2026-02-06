@@ -10,8 +10,6 @@ using wizardsoft_testtask.Service.Auth;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -49,19 +47,19 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("Jwt"));
 
-Microsoft.Extensions.Configuration.IConfigurationSection jwtSection = builder.Configuration.GetSection("Jwt");
+IConfigurationSection jwtSection = builder.Configuration.GetSection("Jwt");
 string jwtKey = jwtSection.GetValue<string>("Key") ?? string.Empty;
 string? issuer = jwtSection.GetValue<string>("Issuer");
 string? audience = jwtSection.GetValue<string>("Audience");
 byte[] keyBytes = Encoding.UTF8.GetBytes(jwtKey);
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddAuthentication(authOptions =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+    authOptions.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    authOptions.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(jwtOptions =>
 {
-    options.TokenValidationParameters = new TokenValidationParameters
+    jwtOptions.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
@@ -75,7 +73,6 @@ builder.Services.AddAuthentication(options =>
 
 WebApplication app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

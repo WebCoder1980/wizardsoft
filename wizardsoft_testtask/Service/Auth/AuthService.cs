@@ -25,7 +25,7 @@ namespace wizardsoft_testtask.Service.Auth
         }
         public async Task<LoginResponse?> Login(LoginRequest request)
         {
-            User? user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(x => x.UserName == request.UserName);
+            User? user = await _dbContext.Users.AsNoTracking().FirstOrDefaultAsync(user => user.UserName == request.UserName);
             if (user == null)
             {
                 throw new InvalidCredentialsException();
@@ -64,8 +64,8 @@ namespace wizardsoft_testtask.Service.Auth
 
         public async Task<RegisterResponse?> Register(RegisterRequest request)
         {
-            bool exists = await _dbContext.Users.AnyAsync(x => x.UserName == request.UserName);
-            if (exists)
+            bool userExists = await _dbContext.Users.AnyAsync(user => user.UserName == request.UserName);
+            if (userExists)
             {
                 throw new UserAlreadyExistsException();
             }
