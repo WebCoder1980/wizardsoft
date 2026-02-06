@@ -50,7 +50,7 @@ namespace wizardsoft_testtask.Service
 
         public async Task<TreeNodeResponse> CreateAsync(TreeNodeCreateRequest request, CancellationToken cancellationToken)
         {
-            await using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             TreeNode? parent = null;
             if (request.ParentId.HasValue)
@@ -77,7 +77,7 @@ namespace wizardsoft_testtask.Service
 
         public async Task<TreeNodeResponse?> UpdateAsync(long id, TreeNodeUpdateRequest request, CancellationToken cancellationToken)
         {
-            await using Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
+            await using IDbContextTransaction transaction = await _db.Database.BeginTransactionAsync(cancellationToken);
 
             TreeNode? node = await _db.TreeNodes.FirstOrDefaultAsync(treeNode => treeNode.Id == id, cancellationToken);
             if (node == null)
@@ -151,13 +151,13 @@ namespace wizardsoft_testtask.Service
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
 
-            List<TreeNodeResponse> result = new List<TreeNodeResponse>();
+            List<TreeNodeResponse> rootsResponse = new List<TreeNodeResponse>();
             foreach (TreeNode root in roots)
             {
-                result.Add(await BuildTree(root, cancellationToken));
+                rootsResponse.Add(await BuildTree(root, cancellationToken));
             }
 
-            return result;
+            return rootsResponse;
         }
 
         private async Task<TreeNodeResponse> BuildTree(TreeNode node, CancellationToken cancellationToken)
