@@ -1,4 +1,33 @@
-# Исходное ТЗ
+# Запуск
+
+В терминале:
+
+```
+git clone https://github.com/WebCoder1980/wizardsoft
+cd wizardsoft
+```
+
+Дальнейшие шаги зависят от вариантов
+
+## Через Docker
+
+```
+docker build -t wizardsoft_testtask .
+
+docker run -p 35001:8080 -e ASPNETCORE_ENVIRONMENT=Development wizardsoft_testtask
+```
+
+Адрес к Swagger: http://localhost:35001/swagger/index.html
+
+## В Visual Studio
+
+Открыть проект.
+
+Нажать F5.
+
+Откроется новое окно браузера со `Swagger`.
+
+# Описание
 
 Создать минималистичный веб-сервис с использованием ASP.NET Core (.NET8.0), EF Core, SQLite, Docker.
 Сервис должен содержать:
