@@ -31,8 +31,7 @@ namespace wizardsoft_testtask.Service.Auth
                 throw new InvalidCredentialsException();
             }
 
-            string passwordHash = AuthUtil.HashPassword(request.Password);
-            if (!string.Equals(user.PasswordHash, passwordHash, StringComparison.Ordinal))
+            if (!AuthUtil.VerifyPassword(request.Password, user.PasswordHash))
             {
                 throw new InvalidCredentialsException();
             }
