@@ -16,6 +16,24 @@ admin | admin_password (это админ)
 maxsmg | qweqwe (это пользователь)
 ```
 
+## Через Docker
+
+```
+docker build -t wizardsoft_testtask .
+
+docker run -p 35001:8080 -e ASPNETCORE_ENVIRONMENT=Development wizardsoft_testtask
+```
+
+Адрес к Swagger: http://localhost:35001/swagger/index.html
+
+## В Visual Studio
+
+Открыть проект.
+
+Нажать F5.
+
+Откроется новое окно браузера со `Swagger`.
+
 # Скриншоты работы
 
 Приложение содержит CRUD для работы с деревом и авторизация+регистрация для пользователей. 
@@ -65,24 +83,6 @@ maxsmg | qweqwe (это пользователь)
 ## Обнаружение цикла при изменении дерева
 
 <img width="1064" height="925" alt="image" src="https://github.com/user-attachments/assets/dcdc3f44-4bfb-43de-8d9f-8b25bdac0719" />
-
-## Через Docker
-
-```
-docker build -t wizardsoft_testtask .
-
-docker run -p 35001:8080 -e ASPNETCORE_ENVIRONMENT=Development wizardsoft_testtask
-```
-
-Адрес к Swagger: http://localhost:35001/swagger/index.html
-
-## В Visual Studio
-
-Открыть проект.
-
-Нажать F5.
-
-Откроется новое окно браузера со `Swagger`.
 
 # Описание
 
